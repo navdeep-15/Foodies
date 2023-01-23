@@ -1,0 +1,5 @@
+export default {
+    SPLASH_SCREEN: 'SPLASH_SCREEN',
+    HOME_SCREEN: 'HOME_SCREEN',
+    DETAIL_SCREEN: 'DETAIL_SCREEN',
+};

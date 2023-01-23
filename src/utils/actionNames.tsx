@@ -1,0 +1,3 @@
+export default {
+    DYNAMIC_LINK_REDUCER: 'DYNAMIC_LINK_REDUCER'
+}
