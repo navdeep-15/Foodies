@@ -1,5 +1,5 @@
 import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, Alert, BackHandler } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { vh, vw } from '@navdeep/utils/dimensions'
 import localImages from '@navdeep/utils/localImages'
 import { Header } from '@navdeep/components/Header'
@@ -9,6 +9,7 @@ import constant from '@navdeep/utils/constant'
 import { useSelector } from 'react-redux'
 import Share from 'react-native-share';
 import RNExitApp from 'react-native-exit-app'
+import { useIsFocused } from '@react-navigation/native'
 
 interface Props {
     navigation: any,
@@ -16,8 +17,23 @@ interface Props {
 }
 
 export default function DetailScreen(props: Props) {
-    const { sectionIndex, itemIndex } = props?.route?.params ?? useSelector((state: any) => state?.dynamicLinkReducer)
-    const { screenName } = useSelector((state: any) => state?.dynamicLinkReducer)
+    const isFocused = useIsFocused()
+
+    const { sectionIndex, itemIndex, screenName } = useSelector((state: any) => state?.dynamicLinkReducer)
+
+    const [itemDetailObject, setitemDetailObject] = useState({
+        sectionIndex: props?.route?.params?.sectionIndex,
+        itemIndex: props?.route?.params?.itemIndex
+    })
+
+    useEffect(() => {
+        if (isFocused && screenName?.length) {
+            setitemDetailObject({
+                sectionIndex: sectionIndex,
+                itemIndex: itemIndex
+            })
+        }
+    }, [isFocused, screenName])
 
     useEffect(() => {
         const backAction = () => {
@@ -33,11 +49,11 @@ export default function DetailScreen(props: Props) {
         };
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
         return () => backHandler.remove();
-    }, []);
+    }, [screenName]);
 
     const onPressShareLink = () => {
         dynamicLinks().buildShortLink({
-            link: `https://navdeep.com/link?screen=${screenNames?.DETAIL_SCREEN}&sectionIndex=${sectionIndex}&itemIndex=${itemIndex}`,
+            link: `https://navdeep.com/link?screen=${screenNames?.DETAIL_SCREEN}&sectionIndex=${itemDetailObject?.sectionIndex}&itemIndex=${itemDetailObject?.itemIndex}`,
             domainUriPrefix: 'https://foodlist.page.link',
             android: {
                 packageName: 'com.foodlist',
@@ -63,10 +79,10 @@ export default function DetailScreen(props: Props) {
     return (
         <SafeAreaView style={styles.container}>
             <Header title={'Details'} navigation={props?.navigation} />
-            <Image source={constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.image} style={styles.img} resizeMode='contain' />
+            <Image source={constant?.MENU_DATA?.[itemDetailObject?.sectionIndex]?.data?.[itemDetailObject?.itemIndex]?.image} style={styles.img} resizeMode='contain' />
             <Image source={localImages.VEG} style={styles.vegImage} />
-            <Text style={styles.itemName}>{constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.name ?? ''}</Text>
-            <Text style={styles.price}>{constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.price ?? ''}</Text>
+            <Text style={styles.itemName}>{constant?.MENU_DATA?.[itemDetailObject?.sectionIndex]?.data?.[itemDetailObject?.itemIndex]?.name ?? ''}</Text>
+            <Text style={styles.price}>{constant?.MENU_DATA?.[itemDetailObject?.sectionIndex]?.data?.[itemDetailObject?.itemIndex]?.price ?? ''}</Text>
             <TouchableOpacity onPress={onPressShareLink} style={styles.shareBtn} activeOpacity={0.6}>
                 <Text style={styles.shareText}>Share Link</Text>
             </TouchableOpacity>

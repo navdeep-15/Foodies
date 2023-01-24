@@ -25,9 +25,6 @@ export function clearDynamicLinkReducer() {
         dispatch({
             type: actionNames?.DYNAMIC_LINK_REDUCER,
             payload: {
-                screenName: '',
-                sectionIndex: '',
-                itemIndex: ''
             }
         })
     }
