@@ -1,5 +1,5 @@
-import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, Alert, BackHandler } from 'react-native'
+import React, { useEffect } from 'react'
 import { vh, vw } from '@navdeep/utils/dimensions'
 import localImages from '@navdeep/utils/localImages'
 import { Header } from '@navdeep/components/Header'
@@ -7,6 +7,8 @@ import dynamicLinks from '@react-native-firebase/dynamic-links';
 import screenNames from '@navdeep/utils/screenNames'
 import constant from '@navdeep/utils/constant'
 import { useSelector } from 'react-redux'
+import Share from 'react-native-share';
+import RNExitApp from 'react-native-exit-app'
 
 interface Props {
     navigation: any,
@@ -15,6 +17,23 @@ interface Props {
 
 export default function DetailScreen(props: Props) {
     const { sectionIndex, itemIndex } = props?.route?.params ?? useSelector((state: any) => state?.dynamicLinkReducer)
+    const { screenName } = useSelector((state: any) => state?.dynamicLinkReducer)
+
+    useEffect(() => {
+        const backAction = () => {
+            if (screenName?.length) {
+                Alert.alert('Hold On', 'Are you sure you want to exit', [
+                    { text: "No", onPress: () => null, style: "cancel" },
+                    { text: 'Yes', onPress: () => RNExitApp.exitApp() }
+                ]);
+            }
+            else
+                props?.navigation?.goBack()
+            return true;
+        };
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+        return () => backHandler.remove();
+    }, []);
 
     const onPressShareLink = () => {
         dynamicLinks().buildShortLink({
@@ -29,6 +48,13 @@ export default function DetailScreen(props: Props) {
             }
         }).then((res) => {
             console.log('response of generated link : ', res)
+            let options = {
+                title: 'Share Foodies link via',
+                message: `Click on the below Foodies link \n ${res}`,
+                subject: 'Share your food details from Foodies',
+                forceDialog: true,
+            };
+            Share.open(options);
         }).catch((e: any) => {
             console.log('error while generating link : ', e)
         })

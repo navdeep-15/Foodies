@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import React, { memo } from 'react'
 import localImages from '@navdeep/utils/localImages'
 import { vh, vw } from '@navdeep/utils/dimensions'
+import { useSelector } from 'react-redux'
 
 interface Props {
     title: string,
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const Header = memo((props: Props) => {
+    const { screenName } = useSelector((state: any) => state?.dynamicLinkReducer)
 
     const goBack = () => {
         props?.navigation?.goBack()
@@ -16,10 +18,13 @@ export const Header = memo((props: Props) => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={goBack} hitSlop={styles.hitSlop}>
-                <Image source={localImages?.BACK} style={styles.backImg} />
-            </TouchableOpacity>
-            <Text style={styles.screenHeading}>{props?.title ?? ''}</Text>
+            {
+                screenName?.length ? null :
+                    <TouchableOpacity onPress={goBack} hitSlop={styles.hitSlop}>
+                        <Image source={localImages?.BACK} style={styles.backImg} />
+                    </TouchableOpacity>
+            }
+            <Text style={[styles.screenHeading, { marginLeft: screenName?.length ? vw(30) : vw(0) }]}>{props?.title ?? ''}</Text>
         </View>
     )
 })
