@@ -25,21 +25,21 @@ export default function HomeScreen(props: Props) {
         return () => backHandler.remove();
     }, []);
 
-    const onPressItem = (item: any) => {
-        props?.navigation?.navigate(screenNames?.DETAIL_SCREEN, { item })
+    const onPressItem = (item: any, index: any) => {
+        props?.navigation?.navigate(screenNames?.DETAIL_SCREEN, { sectionIndex: item?.type ?? 0, itemIndex: index ?? 0 })
     }
 
     const keyExtractor = useCallback((item, index) => index?.toString(), [])
 
-    const renderItem = useCallback(({ item }: any) => {
+    const renderItem = useCallback(({ item, index }: any) => {
         return (
-            <TouchableOpacity onPress={() => onPressItem(item)} style={styles.itemContainer} activeOpacity={0.6}>
+            <TouchableOpacity onPress={() => onPressItem(item, index)} style={styles.itemContainer} activeOpacity={0.6}>
                 <View style={styles.leftContainer}>
                     <Image source={localImages.VEG} style={styles.vegImage} />
                     <Text style={styles.itemName}>{item?.name ?? ''}</Text>
                     <Text style={styles.price}>{item?.price ?? ''}</Text>
                 </View>
-                <Image source={{ uri: item?.image }} style={styles.img} resizeMode='contain' />
+                <Image source={item?.image} style={styles.img} resizeMode='contain' />
             </TouchableOpacity>
         )
     }, [])

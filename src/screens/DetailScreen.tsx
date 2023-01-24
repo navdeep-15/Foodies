@@ -4,6 +4,9 @@ import { vh, vw } from '@navdeep/utils/dimensions'
 import localImages from '@navdeep/utils/localImages'
 import { Header } from '@navdeep/components/Header'
 import dynamicLinks from '@react-native-firebase/dynamic-links';
+import screenNames from '@navdeep/utils/screenNames'
+import constant from '@navdeep/utils/constant'
+import { useSelector } from 'react-redux'
 
 interface Props {
     navigation: any,
@@ -11,12 +14,19 @@ interface Props {
 }
 
 export default function DetailScreen(props: Props) {
-    const { name, price, image } = props?.route?.params?.item
+    const { sectionIndex, itemIndex } = props?.route?.params ?? useSelector((state: any) => state?.dynamicLinkReducer)
 
     const onPressShareLink = () => {
-        dynamicLinks().buildLink({
-            link: 'https://navdeep.com',
+        dynamicLinks().buildShortLink({
+            link: `https://navdeep.com/link?screen=${screenNames?.DETAIL_SCREEN}&sectionIndex=${sectionIndex}&itemIndex=${itemIndex}`,
             domainUriPrefix: 'https://foodlist.page.link',
+            android: {
+                packageName: 'com.foodlist',
+                fallbackUrl: 'https://play.google.com/',
+            },
+            navigation: {
+                forcedRedirectEnabled: true,
+            }
         }).then((res) => {
             console.log('response of generated link : ', res)
         }).catch((e: any) => {
@@ -27,10 +37,10 @@ export default function DetailScreen(props: Props) {
     return (
         <SafeAreaView style={styles.container}>
             <Header title={'Details'} navigation={props?.navigation} />
-            <Image source={{ uri: image }} style={styles.img} resizeMode='contain' />
+            <Image source={constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.image} style={styles.img} resizeMode='contain' />
             <Image source={localImages.VEG} style={styles.vegImage} />
-            <Text style={styles.itemName}>{name ?? ''}</Text>
-            <Text style={styles.price}>{price ?? ''}</Text>
+            <Text style={styles.itemName}>{constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.name ?? ''}</Text>
+            <Text style={styles.price}>{constant?.MENU_DATA?.[sectionIndex]?.data?.[itemIndex]?.price ?? ''}</Text>
             <TouchableOpacity onPress={onPressShareLink} style={styles.shareBtn} activeOpacity={0.6}>
                 <Text style={styles.shareText}>Share Link</Text>
             </TouchableOpacity>
